@@ -141,9 +141,9 @@ class PathTree():
     def __repr__(self):
         return self.name
 
-    def add_children(self, obj_list):
-        for obj in obj_list:
-            self.children.append(PathNode(*obj))
+    def add_children(self, sym_list):
+        for symbol in sym_list:
+            self.children.append(PathNode(*symbol))
 
     def get_size(self):
         if self.size is None:
@@ -169,7 +169,7 @@ class PathNode(PathTree):
 
 
 def parse_elf(filename, minimum_size=100, function_regex='', object_regex=''):
-    """parse elf file into a {path: [(object, linenumber, size)]} dictionary"""
+    """parse elf file into a {path: [(symbol, linenumber, size)]} dictionary"""
 
     output = subprocess.check_output([
                 "nm",
@@ -241,7 +241,7 @@ Regular expression examples:
 
 Minumum size:
   The minimum-size argument is taken as an inclusion hurdle, i.e.
-  objects/functions below that size are not taken into consideration at all.
+  symbols below that size are not taken into consideration at all.
 """
     sys.exit()
 
