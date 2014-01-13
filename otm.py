@@ -158,7 +158,7 @@ class PathTree():
 
 class PathNode(PathTree):
 
-    def __init__(self, name, line, size, otype, bind):
+    def __init__(self, name, line, size, otype):
         self.children = []
         print "\t", name, otype
         self.name = name
@@ -166,61 +166,41 @@ class PathNode(PathTree):
         self.line = line
         self.isfile = False
         self.otype = otype
-        self.bind = bind
 
 
 def parse_elf(filename, minimum_size=100, function_regex='', object_regex=''):
     """parse elf file into a {path: [(object, linenumber, size)]} dictionary"""
 
-    # Use readelf to get object names, sizes and addresses
-    # The output format is:
-    # 339: 00005968  1694 FUNC    GLOBAL DEFAULT    1 vuprintf
     output = subprocess.check_output([
-                "readelf",
-                "-s",
+                "nm",
+                "--radix=d",
+                "-S",
+                "-l",
+                "--size-sort",
                 filename])
 
-    # Use addr2line for all objects to get object paths.
-    # Store path -> objects + sizes into a dictionary.
+    "addr size type name [path:line]"
+    addressses = [x.split() for x in output.splitlines()]
+
     paths = dict()
-    lines = output.splitlines()
-    i = 0
-    while ".symtab" not in lines[i]:
-        i += 1
-    i += 2
-
-    addressses = dict()
-    for line in lines[i:]:
-        #print "parsing line:", line
-        foo = line.split()
-        addressses[foo[1]] = foo
-
-    out = subprocess.check_output([
-        "addr2line",
-        "-e",
-        filename
-        ] + addressses.keys())
-    addr_paths = [l.split(":") for l in out.splitlines()]
-
-    it = iter(addr_paths)
-    for addr in addressses:
-        p = it.next()
-        foo = addressses[addr]
-        size = foo[2]
-        otype = foo[3]
-        bind = foo[4]
-        name = foo[-1]
+    for foo in addressses:
+        size = foo[1]
+        otype = foo[2]
+        name = foo[3]
+        if len(foo) > 4:
+            pathname,lineno = foo[4].split(":")
+        else:
+            pathname,lineno = '??','?'
         size = int(size)
         if size < minimum_size:
             continue
-        pathname, lineno = p
         pathname = path.normpath(pathname)
         if pathname[0] == '/':
             pathname = pathname[1:]
 
-        if otype == "FUNC":
+        if otype in "tT":
             pat = function_regex
-        elif otype == "OBJECT":
+        elif otype in 'bB':
             pat = object_regex
         else:
             pat = ""
@@ -229,7 +209,7 @@ def parse_elf(filename, minimum_size=100, function_regex='', object_regex=''):
 
         if not pathname in paths:
             paths[pathname] = list()
-        paths[pathname].append((name, lineno, size, otype, bind))
+        paths[pathname].append((name, lineno, size, otype))
 
     return paths
 
@@ -257,7 +237,7 @@ def exit_doc():
 Regular expression examples:
   --func-regex "xxxxxx"    # (probably) filter out functions completely
   --func-regex "net|core"  # display any function that comes from net or core
-  --obj-regex "\?\?"       # display objects that readelf could not look up
+  --obj-regex "\?\?"       # display only objects that nm could not look up
 
 Minumum size:
   The minimum-size argument is taken as an inclusion hurdle, i.e.
