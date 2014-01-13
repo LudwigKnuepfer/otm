@@ -168,7 +168,10 @@ class PathNode(PathTree):
         self.otype = otype
 
 
-def parse_elf(filename, minimum_size=100, function_regex='', object_regex=''):
+def parse_elf(filename, minimum_size=100,
+        function_path_regex='', function_name_regex='',
+        object_path_regex='', object_name_regex='',
+        ):
     """parse elf file into a {path: [(symbol, linenumber, size)]} dictionary"""
 
     output = subprocess.check_output([
@@ -186,7 +189,7 @@ def parse_elf(filename, minimum_size=100, function_regex='', object_regex=''):
     for foo in addressses:
         size = foo[1]
         otype = foo[2]
-        name = foo[3]
+        symbolname = foo[3]
         if len(foo) > 4:
             pathname,lineno = foo[4].split(":")
         else:
@@ -199,17 +202,22 @@ def parse_elf(filename, minimum_size=100, function_regex='', object_regex=''):
             pathname = pathname[1:]
 
         if otype in "tT":
-            pat = function_regex
+            ppat = function_path_regex
+            npat = function_name_regex
         elif otype in 'bB':
-            pat = object_regex
+            ppat = object_path_regex
+            npat = object_name_regex
         else:
-            pat = ""
-        if not re.search(pat, pathname):
+            ppat = ""
+            npat = ""
+        if not re.search(ppat, pathname):
+            continue
+        if not re.search(npat, symbolname):
             continue
 
         if not pathname in paths:
             paths[pathname] = list()
-        paths[pathname].append((name, lineno, size, otype))
+        paths[pathname].append((symbolname, lineno, size, otype))
 
     return paths
 
@@ -223,9 +231,13 @@ def arg_parser():
             action="store_true", default=argparse.SUPPRESS,
             help="print additional documentation and exit")
 
-    p.add_argument("-f", "--function-regex", default="",
+    p.add_argument("-f", "--function-path-regex", default="",
             help="regular expression for function path filtering")
-    p.add_argument("-o","--object-regex", default="",
+    p.add_argument("-o","--object-path-regex", default="",
+            help="regular expression for object path filtering")
+    p.add_argument("-F", "--function-name-regex", default="",
+            help="regular expression for function path filtering")
+    p.add_argument("-O","--object-name-regex", default="",
             help="regular expression for object path filtering")
     p.add_argument("-m","--minimum-size", type=int, default=1,
             help="mininum size for all types")
