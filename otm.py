@@ -236,9 +236,9 @@ def arg_parser():
     p.add_argument("-o","--object-path-regex", default="",
             help="regular expression for object path filtering")
     p.add_argument("-F", "--function-name-regex", default="",
-            help="regular expression for function path filtering")
+            help="regular expression for function name filtering")
     p.add_argument("-O","--object-name-regex", default="",
-            help="regular expression for object path filtering")
+            help="regular expression for object name filtering")
     p.add_argument("-m","--minimum-size", type=int, default=1,
             help="mininum size for all types")
 
