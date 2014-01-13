@@ -265,7 +265,6 @@ Minumum size:
 """
     sys.exit()
 
-#TODO: use option parser
 if __name__ == '__main__':
     args = arg_parser().parse_args()
     if hasattr(args,"documentation"):
