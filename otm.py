@@ -168,7 +168,7 @@ class PathNode(PathTree):
         self.otype = otype
 
 
-def parse_elf(filename, minimum_size=100,
+def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
         function_path_regex='', function_name_regex='',
         object_path_regex='', object_name_regex='',
         ):
@@ -214,6 +214,8 @@ def parse_elf(filename, minimum_size=100,
             continue
         if not re.search(npat, symbolname):
             continue
+        if symbol_type_list != "" and otype not in symbol_type_list:
+            continue
 
         if not pathname in paths:
             paths[pathname] = list()
@@ -239,6 +241,8 @@ def arg_parser():
             help="regular expression for function name filtering")
     p.add_argument("-O","--object-name-regex", default="",
             help="regular expression for object name filtering")
+    p.add_argument("-t","--symbol-type-list", default="",
+            help="list of symbol types to include")
     p.add_argument("-m","--minimum-size", type=int, default=1,
             help="mininum size for all types")
 
