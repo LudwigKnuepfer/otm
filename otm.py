@@ -76,7 +76,7 @@ class Treemap:
                 t += ", "
             else:
                 t += "\n"
-            t += str(node.size) + ", " + node.otype
+            t += str(node.size) + ", " + node.stype
             c='w'
             if rw < rh:
                 o = "vertical"
@@ -158,14 +158,14 @@ class PathTree():
 
 class PathNode(PathTree):
 
-    def __init__(self, name, line, size, otype):
+    def __init__(self, name, line, size, stype):
         self.children = []
-        print "\t", name, otype
+        print "\t", name, stype
         self.name = name
         self.size = size
         self.line = line
         self.isfile = False
-        self.otype = otype
+        self.stype = stype
 
 
 def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
@@ -188,7 +188,7 @@ def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
     paths = dict()
     for foo in addressses:
         size = foo[1]
-        otype = foo[2]
+        stype = foo[2]
         symbolname = foo[3]
         if len(foo) > 4:
             pathname,lineno = foo[4].split(":")
@@ -201,10 +201,10 @@ def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
         if pathname[0] == '/':
             pathname = pathname[1:]
 
-        if otype in "tT":
+        if stype in "tT":
             ppat = function_path_regex
             npat = function_name_regex
-        elif otype in 'bB':
+        elif stype in 'bB':
             ppat = object_path_regex
             npat = object_name_regex
         else:
@@ -214,12 +214,12 @@ def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
             continue
         if not re.search(npat, symbolname):
             continue
-        if symbol_type_list != "" and otype not in symbol_type_list:
+        if symbol_type_list != "" and stype not in symbol_type_list:
             continue
 
         if not pathname in paths:
             paths[pathname] = list()
-        paths[pathname].append((symbolname, lineno, size, otype))
+        paths[pathname].append((symbolname, lineno, size, stype))
 
     return paths
 
