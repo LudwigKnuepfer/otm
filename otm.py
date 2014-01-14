@@ -251,9 +251,13 @@ def arg_parser():
 def exit_doc():
     print """
 Regular expression examples:
-  --func-regex "xxxxxx"    # (probably) filter out functions completely
-  --func-regex "net|core"  # display any function that comes from net or core
-  --obj-regex "\?\?"       # display only objects that nm could not look up
+  --func-path-regex "net|core"  # display any function that comes from net or core
+  --obj-path-regex "\?\?"       # display only objects that nm could not look up
+  --obj-name-regex "stack"      # display only objects named *stack*
+
+Symbol type list:
+  --symbol-type-list tTbB  # include text and BSS section symbols
+                             check the nm manpage for details
 
 Minumum size:
   The minimum-size argument is taken as an inclusion hurdle, i.e.
