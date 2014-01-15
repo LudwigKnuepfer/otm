@@ -168,9 +168,11 @@ class PathNode(PathTree):
         self.stype = stype
 
 
-def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
-        function_path_regex='', function_name_regex='',
-        object_path_regex='', object_name_regex='',
+def parse_elf(filename, minimum_size=None, symbol_type_list=None,
+        function_path_regex_in=None, function_name_regex_in=None,
+        object_path_regex_in=None, object_name_regex_in=None,
+        function_path_regex_ex=None, function_name_regex_ex=None,
+        object_path_regex_ex=None, object_name_regex_ex=None,
         ):
     """parse elf file into a {path: [(symbol, linenumber, size)]} dictionary"""
 
@@ -195,26 +197,35 @@ def parse_elf(filename, minimum_size=100, symbol_type_list='tTbB',
         else:
             pathname,lineno = '??','?'
         size = int(size)
-        if size < minimum_size:
+        if minimum_size and size < minimum_size:
             continue
         pathname = path.normpath(pathname)
         if pathname[0] == '/':
             pathname = pathname[1:]
 
         if stype in "tT":
-            ppat = function_path_regex
-            npat = function_name_regex
+            ppati = function_path_regex_in
+            npati = function_name_regex_in
+            ppate = function_path_regex_ex
+            npate = function_name_regex_ex
         elif stype in 'bB':
-            ppat = object_path_regex
-            npat = object_name_regex
+            ppati = object_path_regex_in
+            npati = object_name_regex_in
+            ppate = object_path_regex_ex
+            npate = object_name_regex_ex
         else:
-            ppat = ""
-            npat = ""
-        if not re.search(ppat, pathname):
+            ppat = None
+            npat = None
+
+        if ppati and not re.search(ppati, pathname):
             continue
-        if not re.search(npat, symbolname):
+        if npati and not re.search(npati, symbolname):
             continue
-        if symbol_type_list != "" and stype not in symbol_type_list:
+        if ppate and re.search(ppate, pathname):
+            continue
+        if npate and re.search(npate, symbolname):
+            continue
+        if symbol_type_list and stype not in symbol_type_list:
             continue
 
         if not pathname in paths:
@@ -233,15 +244,25 @@ def arg_parser():
             action="store_true", default=argparse.SUPPRESS,
             help="print additional documentation and exit")
 
-    p.add_argument("-f", "--function-path-regex", default="",
-            help="regular expression for function path filtering")
-    p.add_argument("-o","--object-path-regex", default="",
-            help="regular expression for object path filtering")
-    p.add_argument("-F", "--function-name-regex", default="",
-            help="regular expression for function name filtering")
-    p.add_argument("-O","--object-name-regex", default="",
-            help="regular expression for object name filtering")
-    p.add_argument("-t","--symbol-type-list", default="",
+    p.add_argument("-fp", "--function-path-regex-in", default=None,
+            help="regular expression for function path inclusion")
+    p.add_argument("-op","--object-path-regex-in", default=None,
+            help="regular expression for object path inclusion")
+    p.add_argument("-fn", "--function-name-regex-in", default=None,
+            help="regular expression for function name inclusion")
+    p.add_argument("-on","--object-name-regex-in", default=None,
+            help="regular expression for object name inclusion")
+
+    p.add_argument("-Fp", "--function-path-regex-ex", default=None,
+            help="regular expression for function path exclusion")
+    p.add_argument("-Op","--object-path-regex-ex", default=None,
+            help="regular expression for object path exclusion")
+    p.add_argument("-Fn", "--function-name-regex-ex", default=None,
+            help="regular expression for function name exclusion")
+    p.add_argument("-On","--object-name-regex-ex", default=None,
+            help="regular expression for object name exclusion")
+
+    p.add_argument("-t","--symbol-type-list", default=None,
             help="list of symbol types to include")
     p.add_argument("-m","--minimum-size", type=int, default=1,
             help="mininum size for all types")
@@ -251,17 +272,31 @@ def arg_parser():
 def exit_doc():
     print """
 Regular expression examples:
-  --func-path-regex "net|core"  # display any function that comes from net or core
-  --obj-path-regex "\?\?"       # display only objects that nm could not look up
-  --obj-name-regex "stack"      # display only objects named *stack*
+    display only functions that come from net or core:
+        --function-path-regex-in "net|core"
+
+    display only objects that nm could not look up
+        --obj-path-regex "\?\?"
+
+    do not display objects that end on _stack
+        --object-name-regex-ex "_stack$"
+
+    When combining these options, exclusion takes precedence over
+    inclusion:
+
+    display only objects from main.c filtering out stacks:
+        -op "main\.c" -On "_stack$|_stk$"
+
 
 Symbol type list:
-  --symbol-type-list tTbB  # include text and BSS section symbols
-                             check the nm manpage for details
+    include text and BSS section symbols check the nm manpage for
+    details:
+        --symbol-type-list tTbB
+
 
 Minumum size:
-  The minimum-size argument is taken as an inclusion hurdle, i.e.
-  symbols below that size are not taken into consideration at all.
+    The minimum-size argument is taken as an inclusion hurdle, i.e.
+    symbols below that size are not taken into consideration at all.
 """
     sys.exit()
 
