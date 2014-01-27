@@ -45,11 +45,8 @@ class Treemap:
         self.draw_rectangle(lower, upper, node)
         width = upper[axis] - lower[axis]
         ns = node.get_size()
-        #print node.name, "w:", width
-        #print "node has", len(node.children)
 
         for child in node.children:
-            #print "child:", child.name
             cs = child.get_size()
             upper[axis] = (lower[axis] + ((width * float(cs)) / ns))
             lo = list(lower)
@@ -58,7 +55,6 @@ class Treemap:
             lower[axis] = upper[axis]
 
     def draw_rectangle(self, lower, upper, node):
-        #print lower, upper
         r = Rectangle( lower, upper[0]-lower[0], upper[1] - lower[1],
                    edgecolor='k',
                    facecolor= node.get_color(),
