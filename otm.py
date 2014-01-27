@@ -34,7 +34,7 @@ from matplotlib.patches import Rectangle
 
 class Treemap:
     def __init__(self, tree):
-        self.ax = pylab.subplot(111,aspect='equal')
+        self.ax = pylab.subplot(111,aspect='auto')
         pylab.subplots_adjust(left=0, right=1, top=1, bottom=0)
         self.ax.set_xticks([])
         self.ax.set_yticks([])
