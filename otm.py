@@ -164,11 +164,14 @@ class PathNode(PathTree):
         self.stype = stype
 
         if self.stype in "tT":
-            self.color_start = (0.5, 0.5, 0.5)
-            self.color_size = (0.5, 0.5, 0.5)
+            self.color_start = (0.0, 0.2, 0.0)
+            self.color_size = (0.0, 0.8, 0.0)
+        elif self.stype in "bB":
+            self.color_start = (0.2, 0.0, 0.0)
+            self.color_size = (0.8, 0.0, 0.0)
         else:
-            self.color_start = (0.0, 0.0, 0.0)
-            self.color_size = (0.5, 0.5, 0.5)
+            self.color_start = (0.0, 0.0, 0.2)
+            self.color_size = (0.0, 0.0, 0.8)
 
     def get_color(self):
         x = self.color_start
