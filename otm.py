@@ -163,12 +163,18 @@ class PathNode(PathTree):
         self.isfile = False
         self.stype = stype
 
-        if self.stype in "tT":
-            self.color_start = (0.0, 0.2, 0.0)
-            self.color_size = (0.0, 0.8, 0.0)
-        elif self.stype in "bB":
+        if self.stype in "t":
+            self.color_start = (0.0, 0.2, 0.2)
+            self.color_size = (0.0, 0.4, 0.8)
+        elif self.stype in "T":
+            self.color_start = (0.0, 0.6, 0.0)
+            self.color_size = (0.0, 0.4, 0.0)
+        elif self.stype in "b":
             self.color_start = (0.2, 0.0, 0.0)
-            self.color_size = (0.8, 0.0, 0.0)
+            self.color_size = (0.4, 0.0, 0.0)
+        elif self.stype in "B":
+            self.color_start = (0.6, 0.0, 0.2)
+            self.color_size = (0.4, 0.0, 0.8)
         else:
             self.color_start = (0.0, 0.0, 0.2)
             self.color_size = (0.0, 0.0, 0.8)
