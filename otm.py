@@ -205,6 +205,7 @@ def parse_elf(filename, minimum_size=None, symbol_type_list=None,
     addressses = [x.split() for x in output.splitlines()]
 
     paths = dict()
+    symball = dict()
     for foo in addressses:
         size = foo[1]
         stype = foo[2]
@@ -215,7 +216,8 @@ def parse_elf(filename, minimum_size=None, symbol_type_list=None,
             pathname,lineno = '??','?'
         size = int(size)
         if minimum_size and size < minimum_size:
-            continue
+            print "putting", pathname, ":", symbolname, "into small_bin"
+            symbolname = ''
         pathname = path.normpath(pathname)
         if pathname[0] == '/':
             pathname = pathname[1:]
@@ -247,7 +249,16 @@ def parse_elf(filename, minimum_size=None, symbol_type_list=None,
 
         if not pathname in paths:
             paths[pathname] = list()
-        paths[pathname].append((symbolname, lineno, size, stype))
+
+        sp = pathname + symbolname
+        if not sp in symball:
+            s = [symbolname, lineno, size, stype]
+            paths[pathname].append(s)
+            symball[sp] = s
+        else:
+            print "combining", pathname, ":", symbolname
+            s = symball[sp]
+            s[2] += size
 
     return paths
 
