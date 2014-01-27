@@ -149,7 +149,7 @@ class PathTree():
         return self.size
 
     def get_color(self):
-        return (random.random(),random.random(),random.random())
+        return (1,1,1)
 
 
 class PathNode(PathTree):
@@ -164,21 +164,17 @@ class PathNode(PathTree):
         self.stype = stype
 
         if self.stype in "tT":
-            self.color_start = 0.5
-            self.color_size = 0.5
+            self.color_start = (0.5, 0.5, 0.5)
+            self.color_size = (0.5, 0.5, 0.5)
         else:
-            self.color_start = 0.0
-            self.color_size = 0.5
+            self.color_start = (0.0, 0.0, 0.0)
+            self.color_size = (0.5, 0.5, 0.5)
 
     def get_color(self):
         x = self.color_start
         y = self.color_size
-        return (
-                x + (random.random() * y),
-                x + (random.random() * y),
-                x + (random.random() * y)
-                )
-
+        c = tuple([random.uniform(x[i], x[i] + y[i]) for i in range(3)])
+        return c
 
 def parse_elf(filename, minimum_size=None, symbol_type_list=None,
         function_path_regex_in=None, function_name_regex_in=None,
