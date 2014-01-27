@@ -176,7 +176,7 @@ class PathNode(PathTree):
     def get_color(self):
         x = self.color_start
         y = self.color_size
-        c = tuple([x[i] + (random.random() * y[i]) for i in range(3)])
+        c = tuple([random.uniform(x[i], x[i] + y[i]) for i in range(3)])
         return c
 
 def parse_elf(filename, minimum_size=None, symbol_type_list=None,
