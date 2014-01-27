@@ -178,6 +178,9 @@ class PathNode(PathTree):
         else:
             self.color_start = (0.0, 0.0, 0.2)
             self.color_size = (0.0, 0.0, 0.8)
+        if self.name == '':
+            self.color_start = (0.1, 0.1, 0.1)
+            self.color_size = (0.0, 0.0, 0.0)
 
     def get_color(self):
         x = self.color_start
