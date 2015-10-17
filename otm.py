@@ -212,6 +212,10 @@ def parse_elf(filename, minimum_size=None, symbol_type_list=None,
         else:
             ppat = None
             npat = None
+            ppati = None
+            ppate = None
+            npati = None
+            npate = None
 
         if ppati and not re.search(ppati, pathname):
             continue
